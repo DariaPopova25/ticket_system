@@ -1,0 +1,34 @@
+# virtual environment
+.venv/
+venv/
+
+# env files
+.env
+.env.*
+!.env.example
+
+# python cache
+__pycache__/
+*.py[cod]
+
+# test / coverage / type check / lint cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# django / local files
+db.sqlite3
+*.log
+media/
+staticfiles/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# mypy / pyright / pyre
+.pyre/
