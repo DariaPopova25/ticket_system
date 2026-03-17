@@ -32,3 +32,5 @@ jobs:
 
       - name: Mypy
         run: mypy .
+        env:
+          DJANGO_SECRET_KEY: dummy-ci-secret-key
