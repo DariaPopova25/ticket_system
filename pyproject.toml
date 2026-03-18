@@ -1,0 +1,28 @@
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+extend-exclude = [
+    ".venv",
+    "migrations",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = []
+per-file-ignores = { "ticket_system/settings.py" = ["E501"] }
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "ticket_system.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+testpaths = ["users", "tickets"]
+
+[tool.mypy]
+python_version = "3.14"
+plugins = ["mypy_django_plugin.main"]
+warn_unused_ignores = true
+warn_redundant_casts = true
+check_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "ticket_system.settings"

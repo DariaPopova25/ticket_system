@@ -18,6 +18,7 @@ __pycache__/
 .coverage
 .coverage.*
 htmlcov/
+coverage.xml
 
 # django / local files
 db.sqlite3
