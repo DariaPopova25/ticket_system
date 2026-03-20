@@ -1,19 +1,22 @@
 import pytest
 from django.core.exceptions import ValidationError
+
 from users.models import User
+
 from .factories import UserFactory
+
 
 @pytest.mark.django_db
 def test_creates_user_with_default_role():
-    user_name = 'user_example'
-    user_email = 'user@example.com'
+    user_name = "user_example"
+    user_email = "user@example.com"
 
     user = UserFactory.create(
-        username = user_name,
-        email = user_email,
+        username=user_name,
+        email=user_email,
     )
 
-    assert user.username ==  user_name
+    assert user.username == user_name
     assert user.email == user_email
     assert user.role == User.Role.CLIENT
 
@@ -34,18 +37,19 @@ class TestUserEmail:
 
         with pytest.raises(ValidationError) as excinfo:
             duplicate_user.full_clean()
-        
-        assert 'email' in excinfo.value.message_dict
+
+        assert "email" in excinfo.value.message_dict
+
 
 @pytest.mark.django_db
 class TestUserRole:
     @pytest.mark.parametrize(
-            "role",
-            [
-                User.Role.CLIENT,
-                User.Role.MANAGER,
-                User.Role.DEVELOPER,
-            ]
+        "role",
+        [
+            User.Role.CLIENT,
+            User.Role.MANAGER,
+            User.Role.DEVELOPER,
+        ],
     )
     def test_accepts_allowed_roles(self, role):
         user = UserFactory.build(role=role)
@@ -59,5 +63,5 @@ class TestUserRole:
 
         with pytest.raises(ValidationError) as excinfo:
             user.full_clean()
-        
-        assert 'role' in excinfo.value.message_dict
+
+        assert "role" in excinfo.value.message_dict
