@@ -1,6 +1,7 @@
 -r requirements.txt
 coverage==7.13.5
 django-stubs==6.0.0
+factory-boy==3.3.3
 mypy==1.19.1
 pytest==9.0.2
 pytest-cov==7.0.0
