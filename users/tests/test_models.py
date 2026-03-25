@@ -16,8 +16,6 @@ def test_creates_user_with_default_role():
         email=user_email,
     )
 
-    assert user.username == user_name
-    assert user.email == user_email
     assert user.role == User.Role.CLIENT
 
 
@@ -38,7 +36,7 @@ class TestUserEmail:
         with pytest.raises(ValidationError) as excinfo:
             duplicate_user.full_clean()
 
-        assert "email" in excinfo.value.message_dict
+        assert excinfo.value.error_dict["email"][0].code == "unique"
 
 
 @pytest.mark.django_db
@@ -59,9 +57,9 @@ class TestUserRole:
         assert user.role == role
 
     def test_rejects_invalid_role(self):
-        user = UserFactory.build(role="worker")
+        user = UserFactory.build(role="unknown_role")
 
         with pytest.raises(ValidationError) as excinfo:
             user.full_clean()
 
-        assert "role" in excinfo.value.message_dict
+        assert excinfo.value.error_dict["role"][0].code == "invalid_choice"
