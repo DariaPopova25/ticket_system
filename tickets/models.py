@@ -93,3 +93,43 @@ class Ticket(models.Model):
 
         if errors:
             raise ValidationError(errors)
+
+
+class Comment(models.Model):
+    ticket = models.ForeignKey(
+        "tickets.Ticket",
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="comments",
+    )
+    body = models.TextField(validators=[MaxLengthValidator(500)])
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"Comment #{self.pk} for ticket #{self.ticket_id}"
+
+    def clean(self):
+        super().clean()
+        errors = {}
+
+        CLOSED_STATUSES = {
+            self.ticket.Status.DONE,
+            self.ticket.Status.CANCELLED,
+        }
+
+        if not self.body or not self.body.strip():
+            errors["body"] = "Comment body cannot be empty."
+
+        if self.ticket_id and self.ticket.status in CLOSED_STATUSES:
+            errors["ticket"] = "Comments are not allowed for closed tickets."
+
+        if errors:
+            raise ValidationError(errors)
