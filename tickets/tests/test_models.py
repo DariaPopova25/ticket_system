@@ -16,6 +16,7 @@ def user_client():
 def user_developer():
     return DeveloperFactory.create()
 
+
 @pytest.fixture
 def ticket_factory(user_client, user_developer):
     def make_ticket(status=Ticket.Status.NEW):
@@ -25,7 +26,9 @@ def ticket_factory(user_client, user_developer):
             assignee=user_developer,
             priority=Ticket.Priority.HIGH,
         )
+
     return make_ticket
+
 
 @pytest.mark.django_db
 def test_creates_ticket_with_default_status_and_no_assignee():
@@ -33,6 +36,7 @@ def test_creates_ticket_with_default_status_and_no_assignee():
 
     assert ticket.status == Ticket.Status.NEW
     assert ticket.assignee is None
+
 
 @pytest.mark.django_db
 class TestTicketCreator:
@@ -218,19 +222,20 @@ class TestTicketPriority:
 
         assert excinfo.value.error_dict["priority"][0].code == "invalid_choice"
 
+
 @pytest.mark.django_db
 def test_creates_comment(user_client, ticket_factory):
     ticket = ticket_factory()
 
     comment = CommentFactory.create(
-        user = user_client,
-        ticket = ticket,
-        body = 'fake_body',
+        user=user_client,
+        ticket=ticket,
+        body="fake_body",
     )
 
     assert comment.user == user_client
     assert comment.ticket == ticket
-    assert comment.body == 'fake_body'
+    assert comment.body == "fake_body"
 
 
 @pytest.mark.django_db
@@ -252,23 +257,23 @@ class TestCommentValidation:
         ticket = ticket_factory(status=status)
 
         comment = CommentFactory.build(
-            user = user_client,
-            ticket = ticket,
-            body = 'fake_body',
+            user=user_client,
+            ticket=ticket,
+            body="fake_body",
         )
 
         comment.full_clean()
 
         assert comment.user == user_client
         assert comment.ticket == ticket
-        assert comment.body == 'fake_body'
+        assert comment.body == "fake_body"
 
     def test_rejects_comment_with_blank_body(self, user_client, ticket_factory):
         ticket = ticket_factory()
 
         comment = CommentFactory.build(
-            user = user_client,
-            ticket = ticket,
+            user=user_client,
+            ticket=ticket,
             body="   ",
         )
 
@@ -284,8 +289,8 @@ class TestCommentValidation:
         ticket = ticket_factory(status=status)
 
         comment = CommentFactory.build(
-            user = user_client,
-            ticket = ticket,
+            user=user_client,
+            ticket=ticket,
         )
 
         with pytest.raises(ValidationError) as excinfo:
