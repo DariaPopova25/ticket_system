@@ -3,6 +3,8 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxLengthValidator
 from django.db import models
 
+from users.models import User
+
 
 class Ticket(models.Model):
     class Status(models.TextChoices):
@@ -73,10 +75,10 @@ class Ticket(models.Model):
             self.Status.DONE,
         }
 
-        if self.creator_id and self.creator.role != self.creator.Role.CLIENT:
+        if self.creator_id and self.creator.role != User.Role.CLIENT:
             errors["creator"] = "Creator must have client role."
 
-        if self.assignee_id and self.assignee.role != self.assignee.Role.DEVELOPER:
+        if self.assignee is not None and self.assignee.role != User.Role.DEVELOPER:
             errors["assignee"] = "Assignee must have developer role."
 
         if (
