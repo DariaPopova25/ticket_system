@@ -278,7 +278,9 @@ class TestCommentValidation:
         assert excinfo.value.message_dict["body"] == ["Comment body cannot be empty."]
 
     @pytest.mark.parametrize("status", CLOSED_STATUSES)
-    def test_rejects_comment_for_closed_ticket(self, user_client, ticket_factory, status):
+    def test_rejects_comment_for_closed_ticket(
+        self, user_client, ticket_factory, status
+    ):
         ticket = ticket_factory(status=status)
 
         comment = CommentFactory.build(
@@ -289,4 +291,6 @@ class TestCommentValidation:
         with pytest.raises(ValidationError) as excinfo:
             comment.full_clean()
 
-        assert excinfo.value.message_dict["ticket"] == ["Comments are not allowed for closed tickets."]
+        assert excinfo.value.message_dict["ticket"] == [
+            "Comments are not allowed for closed tickets."
+        ]
