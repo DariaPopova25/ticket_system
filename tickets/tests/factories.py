@@ -1,7 +1,6 @@
 import factory
 
-from tickets.models import Ticket
-from tickets.models import Comment
+from tickets.models import Comment, Ticket
 from users.models import User
 from users.tests.factories import UserFactory
 

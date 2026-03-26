@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from tickets.models import Ticket
 from users.models import User
 
-from .factories import ClientFactory, DeveloperFactory, TicketFactory, CommentFactory
+from .factories import ClientFactory, CommentFactory, DeveloperFactory, TicketFactory
 
 
 @pytest.fixture
