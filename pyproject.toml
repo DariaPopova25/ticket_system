@@ -9,7 +9,7 @@ extend-exclude = [
 [tool.ruff.lint]
 select = ["E", "F", "I", "W"]
 ignore = []
-per-file-ignores = { "ticket_system/settings.py" = ["E501"] }
+per-file-ignores = { "ticket_system/settings.py" = ["E501"], "ticket_system/settings_test.py" = ["F403"] }
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "ticket_system.settings"

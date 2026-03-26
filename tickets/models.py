@@ -1,0 +1,137 @@
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxLengthValidator
+from django.db import models
+
+from users.models import User
+
+
+class Ticket(models.Model):
+    class Status(models.TextChoices):
+        NEW = "new", "New"
+        PENDING_DEVELOPMENT = "pending_development", "Pending development"
+        IN_PROGRESS = "in_progress", "In progress"
+        PENDING_REVIEW = "pending_review", "Pending review"
+        DONE = "done", "Done"
+        CANCELLED = "cancelled", "Cancelled"
+
+    class Priority(models.TextChoices):
+        LOW = "low", "Low"
+        MEDIUM = "medium", "Medium"
+        HIGH = "high", "High"
+
+    creator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="created_tickets",
+    )
+
+    assignee = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="assigned_tickets",
+        null=True,
+        blank=True,
+    )
+
+    title = models.CharField(max_length=255)
+    status = models.CharField(
+        max_length=20,
+        choices=Status,
+        default=Status.NEW,
+    )
+    priority = models.CharField(
+        max_length=20,
+        choices=Priority,
+        blank=True,
+        default="",
+    )
+
+    description = models.TextField(validators=[MaxLengthValidator(10000)])
+    manager_notes = models.TextField(
+        validators=[MaxLengthValidator(2500)], blank=True, default=""
+    )
+    resolution_notes = models.TextField(
+        validators=[MaxLengthValidator(5000)], blank=True, default=""
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Ticket #{self.pk}: {self.title}"
+
+    def clean(self):
+        super().clean()
+        errors = {}
+
+        statuses_requiring_assignee_and_priority = {
+            self.Status.PENDING_DEVELOPMENT,
+            self.Status.IN_PROGRESS,
+            self.Status.PENDING_REVIEW,
+            self.Status.DONE,
+        }
+
+        if self.creator_id and self.creator.role != User.Role.CLIENT:
+            errors["creator"] = "Creator must have client role."
+
+        if self.assignee is not None and self.assignee.role != User.Role.DEVELOPER:
+            errors["assignee"] = "Assignee must have developer role."
+
+        if (
+            self.status in statuses_requiring_assignee_and_priority
+            and self.assignee_id is None
+        ):
+            errors["assignee"] = "Assignee is required for this status."
+
+        if (
+            self.status in statuses_requiring_assignee_and_priority
+            and not self.priority
+        ):
+            errors["priority"] = "Priority is required for this status."
+
+        if errors:
+            raise ValidationError(errors)
+
+
+class Comment(models.Model):
+    ticket = models.ForeignKey(
+        "tickets.Ticket",
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="comments",
+    )
+    body = models.TextField(validators=[MaxLengthValidator(500)])
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"Comment #{self.pk} for ticket #{self.ticket_id}"
+
+    def clean(self):
+        super().clean()
+        errors = {}
+
+        CLOSED_STATUSES = {
+            self.ticket.Status.DONE,
+            self.ticket.Status.CANCELLED,
+        }
+
+        if not self.body or not self.body.strip():
+            errors["body"] = "Comment body cannot be empty."
+
+        if self.ticket_id and self.ticket.status in CLOSED_STATUSES:
+            errors["ticket"] = "Comments are not allowed for closed tickets."
+
+        if errors:
+            raise ValidationError(errors)
