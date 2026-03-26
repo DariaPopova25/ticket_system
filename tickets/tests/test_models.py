@@ -4,18 +4,28 @@ from django.core.exceptions import ValidationError
 from tickets.models import Ticket
 from users.models import User
 
-from .factories import ClientFactory, DeveloperFactory, TicketFactory
+from .factories import ClientFactory, DeveloperFactory, TicketFactory, CommentFactory
 
 
 @pytest.fixture
 def user_client():
-    return ClientFactory()
+    return ClientFactory.create()
 
 
 @pytest.fixture
 def user_developer():
-    return DeveloperFactory()
+    return DeveloperFactory.create()
 
+@pytest.fixture
+def ticket_factory(user_client, user_developer):
+    def make_ticket(status=Ticket.Status.NEW):
+        return TicketFactory.create(
+            creator=user_client,
+            status=status,
+            assignee=user_developer,
+            priority=Ticket.Priority.HIGH,
+        )
+    return make_ticket
 
 @pytest.mark.django_db
 def test_creates_ticket_with_default_status_and_no_assignee():
@@ -23,7 +33,6 @@ def test_creates_ticket_with_default_status_and_no_assignee():
 
     assert ticket.status == Ticket.Status.NEW
     assert ticket.assignee is None
-
 
 @pytest.mark.django_db
 class TestTicketCreator:
@@ -208,3 +217,76 @@ class TestTicketPriority:
             ticket.full_clean()
 
         assert excinfo.value.error_dict["priority"][0].code == "invalid_choice"
+
+@pytest.mark.django_db
+def test_creates_comment(user_client, ticket_factory):
+    ticket = ticket_factory()
+
+    comment = CommentFactory.create(
+        user = user_client,
+        ticket = ticket,
+        body = 'fake_body',
+    )
+
+    assert comment.user == user_client
+    assert comment.ticket == ticket
+    assert comment.body == 'fake_body'
+
+
+@pytest.mark.django_db
+class TestCommentValidation:
+    OPEN_STATUSES = [
+        Ticket.Status.NEW,
+        Ticket.Status.PENDING_DEVELOPMENT,
+        Ticket.Status.IN_PROGRESS,
+        Ticket.Status.PENDING_REVIEW,
+    ]
+
+    CLOSED_STATUSES = [
+        Ticket.Status.DONE,
+        Ticket.Status.CANCELLED,
+    ]
+
+    @pytest.mark.parametrize("status", OPEN_STATUSES)
+    def test_allows_comment_for_open_ticket(self, user_client, ticket_factory, status):
+        ticket = ticket_factory(status=status)
+
+        comment = CommentFactory.build(
+            user = user_client,
+            ticket = ticket,
+            body = 'fake_body',
+        )
+
+        comment.full_clean()
+
+        assert comment.user == user_client
+        assert comment.ticket == ticket
+        assert comment.body == 'fake_body'
+
+    def test_rejects_comment_with_blank_body(self, user_client, ticket_factory):
+        ticket = ticket_factory()
+
+        comment = CommentFactory.build(
+            user = user_client,
+            ticket = ticket,
+            body="   ",
+        )
+
+        with pytest.raises(ValidationError) as excinfo:
+            comment.full_clean()
+
+        assert excinfo.value.message_dict["body"] == ["Comment body cannot be empty."]
+
+    @pytest.mark.parametrize("status", CLOSED_STATUSES)
+    def test_rejects_comment_for_closed_ticket(self, user_client, ticket_factory, status):
+        ticket = ticket_factory(status=status)
+
+        comment = CommentFactory.build(
+            user = user_client,
+            ticket = ticket,
+        )
+
+        with pytest.raises(ValidationError) as excinfo:
+            comment.full_clean()
+
+        assert excinfo.value.message_dict["ticket"] == ["Comments are not allowed for closed tickets."]
