@@ -25,7 +25,6 @@ class Ticket(models.Model):
         on_delete=models.PROTECT,
         related_name="created_tickets",
     )
-
     assignee = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -49,10 +48,14 @@ class Ticket(models.Model):
 
     description = models.TextField(validators=[MaxLengthValidator(10000)])
     manager_notes = models.TextField(
-        validators=[MaxLengthValidator(2500)], blank=True, default=""
+        validators=[MaxLengthValidator(2500)],
+        blank=True,
+        default="",
     )
     resolution_notes = models.TextField(
-        validators=[MaxLengthValidator(5000)], blank=True, default=""
+        validators=[MaxLengthValidator(5000)],
+        blank=True,
+        default="",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
