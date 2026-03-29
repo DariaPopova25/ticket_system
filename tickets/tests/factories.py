@@ -3,6 +3,7 @@ import factory
 from tickets.models import Comment, Ticket
 from users.tests.factories import ClientFactory
 
+
 class TicketFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Ticket

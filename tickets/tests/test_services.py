@@ -2,9 +2,15 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from tickets.models import Ticket
+from tickets.services import (
+    create_comment,
+    create_ticket,
+    developer_update_ticket,
+    manager_update_ticket,
+)
 from users.models import User
-from tickets.services import create_ticket, manager_update_ticket, developer_update_ticket, create_comment
-from users.tests.factories import ClientFactory, ManagerFactory, DeveloperFactory
+from users.tests.factories import ClientFactory, DeveloperFactory, ManagerFactory
+
 from .factories import TicketFactory
 
 
@@ -57,7 +63,7 @@ class TestCreateTicket:
     @pytest.mark.parametrize("user_fixture", ["user_developer", "user_manager"])
     def test_raises_error_if_actor_is_not_client(self, request, user_fixture):
         user = request.getfixturevalue(user_fixture)
-        
+
         with pytest.raises(ValidationError) as excinfo:
             create_ticket(
                 actor = user,
@@ -122,14 +128,14 @@ class TestManagerUpdateTicket:
     def test_raises_error_if_actor_is_not_manager(self, request, ticket_factory, user_fixture):
         ticket = ticket_factory()
         user = request.getfixturevalue(user_fixture)
-        
+
         with pytest.raises(ValidationError) as excinfo:
             manager_update_ticket(
                 actor = user,
                 ticket = ticket,
                 status=Ticket.Status.PENDING_DEVELOPMENT,
             )
-        
+
         assert excinfo.value.messages == ["Only manager can update ticket."]
 
     @pytest.mark.parametrize("status", CLOSED_STATUSES)
@@ -209,27 +215,27 @@ class TestDeveloperUpdateTicket:
     def test_raises_error_if_actor_is_not_developer(self, request, ticket_factory, user_fixture):
         ticket = ticket_factory(status=Ticket.Status.PENDING_DEVELOPMENT)
         user = request.getfixturevalue(user_fixture)
-        
+
         with pytest.raises(ValidationError) as excinfo:
             developer_update_ticket(
                 actor = user,
                 ticket = ticket,
                 status=Ticket.Status.IN_PROGRESS,
             )
-        
+
         assert excinfo.value.messages == ["Only developer can update ticket."]
 
     def test_raises_error_if_developer_updates_ticket_assigned_to_another_developer(self, ticket_factory, user_developer):
         other_developer = DeveloperFactory.create()
         other_ticket = ticket_factory(assignee = other_developer, status=Ticket.Status.PENDING_DEVELOPMENT)
-        
+
         with pytest.raises(ValidationError) as excinfo:
             developer_update_ticket(
                 actor = user_developer,
                 ticket = other_ticket,
                 status=Ticket.Status.IN_PROGRESS,
             )
-        
+
         assert excinfo.value.message_dict["assignee"] == [
             "Developer can update only assigned tickets."
         ]
@@ -237,14 +243,14 @@ class TestDeveloperUpdateTicket:
     @pytest.mark.parametrize("status", DEVELOPER_ALLOWED_STATUSES)
     def test_raises_error_if_developer_updates_ticket_in_new_status(self, status, ticket_factory, user_developer):
         ticket = ticket_factory(status=Ticket.Status.NEW)
-        
+
         with pytest.raises(ValidationError) as excinfo:
             developer_update_ticket(
                 actor = user_developer,
                 ticket = ticket,
                 status=status,
             )
-        
+
         assert excinfo.value.message_dict["status"] == [
             "Developer can update ticket only after pending_development."
         ]
@@ -252,14 +258,14 @@ class TestDeveloperUpdateTicket:
     @pytest.mark.parametrize("status", DEVELOPER_DISALLOWED_STATUSES)
     def test_raises_error_if_developer_sets_disallowed_status(self, status, ticket_factory, user_developer):
         ticket = ticket_factory(status=Ticket.Status.PENDING_DEVELOPMENT)
-        
+
         with pytest.raises(ValidationError) as excinfo:
             developer_update_ticket(
                 actor = user_developer,
                 ticket = ticket,
                 status=status,
             )
-        
+
         assert excinfo.value.message_dict["status"] == [
             "Developer can change status only within working area."
         ]
@@ -328,7 +334,7 @@ class TestCreateComment:
     def test_raises_error_if_client_comments_on_another_users_ticket(self, user_client, ticket_factory):
         other_creator = ClientFactory.create()
         other_ticket = ticket_factory(creator = other_creator, status=Ticket.Status.PENDING_DEVELOPMENT)
-        
+
         with pytest.raises(ValidationError) as excinfo:
             create_comment(
                 actor=user_client,
@@ -341,7 +347,7 @@ class TestCreateComment:
     def test_raises_error_if_developer_comments_on_ticket_assigned_to_another_developer(self, user_developer, ticket_factory):
         other_developer = DeveloperFactory.create()
         other_ticket = ticket_factory(assignee = other_developer, status=Ticket.Status.PENDING_DEVELOPMENT)
-        
+
         with pytest.raises(ValidationError) as excinfo:
             create_comment(
                 actor=user_developer,

@@ -3,9 +3,10 @@ from django.core.exceptions import ValidationError
 
 from tickets.models import Ticket
 from users.models import User
+from users.tests.factories import ClientFactory, DeveloperFactory
 
 from .factories import CommentFactory, TicketFactory
-from users.tests.factories import ClientFactory, DeveloperFactory
+
 
 @pytest.fixture
 def user_client():
