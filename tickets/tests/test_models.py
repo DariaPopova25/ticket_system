@@ -64,9 +64,7 @@ class TestTicketCreator:
         with pytest.raises(ValidationError) as excinfo:
             ticket.full_clean()
 
-        assert excinfo.value.message_dict["creator"] == [
-            "This field cannot be null."
-        ]
+        assert excinfo.value.message_dict["creator"] == ["This field cannot be null."]
 
 
 @pytest.mark.django_db
@@ -300,9 +298,7 @@ class TestCommentValidation:
         with pytest.raises(ValidationError) as excinfo:
             comment.full_clean()
 
-        assert excinfo.value.message_dict["body"] == [
-            "Comment body cannot be empty."
-        ]
+        assert excinfo.value.message_dict["body"] == ["Comment body cannot be empty."]
 
     @pytest.mark.parametrize("status", CLOSED_STATUSES)
     def test_rejects_comment_for_closed_ticket(

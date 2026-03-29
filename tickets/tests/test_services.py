@@ -423,9 +423,7 @@ class TestCreateComment:
                 body="Test body",
             )
 
-        assert excinfo.value.messages == [
-            "Client can comment only on own tickets."
-        ]
+        assert excinfo.value.messages == ["Client can comment only on own tickets."]
 
     def test_raises_error_if_developer_comments_on_ticket_assigned_to_another_developer(
         self,
