@@ -64,7 +64,9 @@ class TestTicketCreator:
         with pytest.raises(ValidationError) as excinfo:
             ticket.full_clean()
 
-        assert excinfo.value.message_dict["creator"] == ["This field cannot be null."]
+        assert excinfo.value.message_dict["creator"] == [
+            "This field cannot be null."
+        ]
 
 
 @pytest.mark.django_db
@@ -95,7 +97,7 @@ class TestTicketAssignee:
 
 @pytest.mark.django_db
 class TestTicketStatus:
-    ALL_ACTIVE_STATUSES = [
+    ALL_STATUSES = [
         Ticket.Status.NEW,
         Ticket.Status.PENDING_DEVELOPMENT,
         Ticket.Status.IN_PROGRESS,
@@ -116,9 +118,12 @@ class TestTicketStatus:
         Ticket.Status.CANCELLED,
     ]
 
-    @pytest.mark.parametrize("status", ALL_ACTIVE_STATUSES)
+    @pytest.mark.parametrize("status", ALL_STATUSES)
     def test_accepts_all_statuses_with_developer_assignee_and_priority(
-        self, user_client, user_developer, status
+        self,
+        user_client,
+        user_developer,
+        status,
     ):
         ticket = TicketFactory.build(
             creator=user_client,
@@ -126,6 +131,7 @@ class TestTicketStatus:
             assignee=user_developer,
             priority=Ticket.Priority.HIGH,
         )
+
         ticket.full_clean()
 
         assert ticket.status == status
@@ -134,12 +140,15 @@ class TestTicketStatus:
 
     @pytest.mark.parametrize("status", STATUSES_ALLOWING_EMPTY_ASSIGNEE_AND_PRIORITY)
     def test_allows_new_and_cancelled_statuses_without_assignee_and_priority(
-        self, user_client, status
+        self,
+        user_client,
+        status,
     ):
         ticket = TicketFactory.build(
             creator=user_client,
             status=status,
         )
+
         ticket.full_clean()
 
         assert ticket.status == status
@@ -148,7 +157,9 @@ class TestTicketStatus:
 
     @pytest.mark.parametrize("status", STATUSES_REQUIRING_ASSIGNEE_AND_PRIORITY)
     def test_rejects_missing_assignee_for_status_requiring_assignee(
-        self, user_client, status
+        self,
+        user_client,
+        status,
     ):
         ticket = TicketFactory.build(
             creator=user_client,
@@ -165,7 +176,10 @@ class TestTicketStatus:
 
     @pytest.mark.parametrize("status", STATUSES_REQUIRING_ASSIGNEE_AND_PRIORITY)
     def test_rejects_statuses_requiring_priority_without_priority(
-        self, user_client, user_developer, status
+        self,
+        user_client,
+        user_developer,
+        status,
     ):
         ticket = TicketFactory.build(
             creator=user_client,
@@ -254,7 +268,12 @@ class TestCommentValidation:
     ]
 
     @pytest.mark.parametrize("status", OPEN_STATUSES)
-    def test_allows_comment_for_open_ticket(self, user_client, ticket_factory, status):
+    def test_allows_comment_for_open_ticket(
+        self,
+        user_client,
+        ticket_factory,
+        status,
+    ):
         ticket = ticket_factory(status=status)
 
         comment = CommentFactory.build(
@@ -281,11 +300,16 @@ class TestCommentValidation:
         with pytest.raises(ValidationError) as excinfo:
             comment.full_clean()
 
-        assert excinfo.value.message_dict["body"] == ["Comment body cannot be empty."]
+        assert excinfo.value.message_dict["body"] == [
+            "Comment body cannot be empty."
+        ]
 
     @pytest.mark.parametrize("status", CLOSED_STATUSES)
     def test_rejects_comment_for_closed_ticket(
-        self, user_client, ticket_factory, status
+        self,
+        user_client,
+        ticket_factory,
+        status,
     ):
         ticket = ticket_factory(status=status)
 
