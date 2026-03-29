@@ -1,17 +1,7 @@
 import factory
 
 from tickets.models import Comment, Ticket
-from users.models import User
-from users.tests.factories import UserFactory
-
-
-class ClientFactory(UserFactory):
-    role = User.Role.CLIENT
-
-
-class DeveloperFactory(UserFactory):
-    role = User.Role.DEVELOPER
-
+from users.tests.factories import ClientFactory
 
 class TicketFactory(factory.django.DjangoModelFactory):
     class Meta:
