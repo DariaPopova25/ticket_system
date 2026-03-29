@@ -16,6 +16,7 @@ DEVELOPER_ALLOWED_STATUSES = {
     Ticket.Status.PENDING_REVIEW,
 }
 
+
 def _ensure_ticket_is_not_closed(ticket):
     if ticket.status in CLOSED_STATUSES:
         raise ValidationError({"status": "Closed tickets cannot be changed."})
@@ -52,17 +53,26 @@ def manager_update_ticket(
     target_status = status if status is not None else ticket.status
 
     if assignee is None and target_status != Ticket.Status.NEW:
-        raise ValidationError({"assignee": "Assignee can be removed only in new status."})
+        raise ValidationError(
+            {"assignee": "Assignee can be removed only in new status."}
+        )
 
-    if assignee is not _UNSET and assignee is not None and assignee.role != User.Role.DEVELOPER:
+    if (
+        assignee is not _UNSET
+        and assignee is not None
+        and assignee.role != User.Role.DEVELOPER
+    ):
         raise ValidationError({"assignee": "Assignee must have developer role."})
 
     if status is not None:
         ticket.status = status
+
     if assignee is not _UNSET:
         ticket.assignee = assignee
+
     if priority is not None:
         ticket.priority = priority
+
     if manager_notes is not None:
         ticket.manager_notes = manager_notes
 
@@ -84,8 +94,9 @@ def developer_update_ticket(
     _ensure_ticket_is_not_closed(ticket)
 
     if ticket.assignee_id != actor.id:
-        raise ValidationError({"assignee": "Developer can update only assigned tickets."})
-
+        raise ValidationError(
+            {"assignee": "Developer can update only assigned tickets."}
+        )
 
     if ticket.status == Ticket.Status.NEW:
         raise ValidationError(
@@ -93,7 +104,9 @@ def developer_update_ticket(
         )
 
     if status is not None and status not in DEVELOPER_ALLOWED_STATUSES:
-        raise ValidationError({"status": "Developer can change status only within working area."})
+        raise ValidationError(
+            {"status": "Developer can change status only within working area."}
+        )
 
     if status is not None:
         ticket.status = status
