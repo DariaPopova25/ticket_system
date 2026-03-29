@@ -9,7 +9,6 @@ class User(AbstractUser):
         DEVELOPER = "developer", "Developer"
 
     email = models.EmailField(unique=True)
-
     role = models.CharField(
         max_length=20,
         choices=Role,
