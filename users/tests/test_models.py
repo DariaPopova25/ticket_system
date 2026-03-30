@@ -30,7 +30,6 @@ class TestUserEmail:
         email = "duplicate@example.com"
 
         UserFactory.create(email=email)
-
         duplicate_user = UserFactory.build(email=email)
 
         with pytest.raises(ValidationError) as excinfo:
