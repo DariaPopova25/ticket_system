@@ -17,6 +17,6 @@ class UserRegisterView(CreateView):
         return redirect("tickets:list")
 
 class UserLoginView(LoginView):
-    template_name = "registration/login.html"
+    template_name = "users/login.html"
     redirect_authenticated_user = True
     next_page = reverse_lazy("tickets:list")
