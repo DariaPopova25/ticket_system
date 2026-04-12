@@ -10,12 +10,12 @@ from tickets.forms import (
 )
 from tickets.models import Ticket
 from tickets.services import (
+    CLOSED_STATUSES,
+    DEVELOPER_ALLOWED_STATUSES,
     create_comment,
     create_ticket,
     developer_update_ticket,
     manager_update_ticket,
-    CLOSED_STATUSES,
-    DEVELOPER_ALLOWED_STATUSES,
 )
 from users.models import User
 
@@ -193,4 +193,3 @@ def comment_create_view(request, pk):
         "comment_form": form,
     }
     return render(request, "tickets/detail.html", data)
-

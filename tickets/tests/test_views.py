@@ -1,12 +1,11 @@
 import pytest
 from django.urls import reverse
 
-from tickets.models import Ticket, Comment
-
-from users.models import User
+from tickets.models import Comment, Ticket
 from users.tests.factories import ClientFactory, DeveloperFactory, ManagerFactory
 
 from .factories import TicketFactory
+
 
 @pytest.fixture
 def user_client():
@@ -17,9 +16,11 @@ def user_client():
 def user_developer():
     return DeveloperFactory.create()
 
+
 @pytest.fixture
 def user_manager():
     return ManagerFactory.create()
+
 
 @pytest.fixture
 def ticket_factory(user_client, user_developer):
@@ -45,7 +46,6 @@ class TestTicketListView:
         client,
         user_manager,
         ticket_factory,
-
     ):
         ticket_one = ticket_factory()
         ticket_two = ticket_factory(creator=ClientFactory.create())
@@ -60,10 +60,7 @@ class TestTicketListView:
         assert ticket_two in tickets
 
     def test_ticket_list_shows_only_own_tickets_to_client(
-        self,
-        client,
-        user_client,
-        ticket_factory
+        self, client, user_client, ticket_factory
     ):
         client_ticket = ticket_factory()
         other_client_ticket = ticket_factory(creator=ClientFactory.create())
@@ -100,7 +97,10 @@ class TestTicketListView:
         response = client.get(reverse("tickets:list"))
 
         assert response.status_code == 302
-        assert response.url == f'{reverse("users:login")}?next={reverse("tickets:list")}'
+        assert (
+            response.url == f"{reverse('users:login')}?next={reverse('tickets:list')}"
+        )
+
 
 @pytest.mark.django_db
 class TestTicketDetailView:
@@ -110,12 +110,12 @@ class TestTicketDetailView:
         user_manager,
         ticket_factory,
     ):
-    
+
         any_ticket = ticket_factory()
 
         client.force_login(user_manager)
 
-        response = client.get(reverse("tickets:detail", kwargs={'pk': any_ticket.id}))
+        response = client.get(reverse("tickets:detail", kwargs={"pk": any_ticket.id}))
         ticket = response.context["ticket"]
 
         assert response.status_code == 200
@@ -132,7 +132,9 @@ class TestTicketDetailView:
 
         client.force_login(user_client)
 
-        response = client.get(reverse("tickets:detail", kwargs={'pk': client_ticket.id}))
+        response = client.get(
+            reverse("tickets:detail", kwargs={"pk": client_ticket.id})
+        )
         ticket = response.context["ticket"]
 
         assert response.status_code == 200
@@ -149,7 +151,9 @@ class TestTicketDetailView:
 
         client.force_login(user_developer)
 
-        response = client.get(reverse("tickets:detail", kwargs={'pk': assigned_ticket.id}))
+        response = client.get(
+            reverse("tickets:detail", kwargs={"pk": assigned_ticket.id})
+        )
         ticket = response.context["ticket"]
 
         assert response.status_code == 200
@@ -186,18 +190,17 @@ class TestTicketDetailView:
         assert response.status_code == 404
 
     def test_ticket_detail_redirects_unauthenticated_user_to_login(
-        self,
-        client,
-        ticket_factory
+        self, client, ticket_factory
     ):
         ticket = ticket_factory()
-    
+
         detail_url = reverse("tickets:detail", kwargs={"pk": ticket.id})
 
         response = client.get(detail_url)
 
         assert response.status_code == 302
-        assert response.url == f'{reverse("users:login")}?next={detail_url}'
+        assert response.url == f"{reverse('users:login')}?next={detail_url}"
+
 
 @pytest.mark.django_db
 class TestTicketCreateView:
@@ -235,7 +238,9 @@ class TestTicketCreateView:
         created_ticket = Ticket.objects.get(title="Test ticket")
 
         assert response.status_code == 302
-        assert response.url == reverse("tickets:detail", kwargs={"pk": created_ticket.id})
+        assert response.url == reverse(
+            "tickets:detail", kwargs={"pk": created_ticket.id}
+        )
         assert created_ticket.creator == user_client
         assert created_ticket.description == "Test description"
 
@@ -276,11 +281,13 @@ class TestTicketCreateView:
         response = client.get(reverse("tickets:create"))
 
         assert response.status_code == 302
-        assert response.url == f'{reverse("users:login")}?next={reverse("tickets:create")}'
+        assert (
+            response.url == f"{reverse('users:login')}?next={reverse('tickets:create')}"
+        )
+
 
 @pytest.mark.django_db
 class TestTicketUpdateView:
-
     CLOSED_STATUSES = [
         Ticket.Status.DONE,
         Ticket.Status.CANCELLED,
@@ -293,10 +300,7 @@ class TestTicketUpdateView:
     ]
 
     def test_manager_can_access_ticket_update_view(
-        self,
-        client,
-        user_manager,
-        ticket_factory
+        self, client, user_manager, ticket_factory
     ):
 
         any_ticket = ticket_factory()
@@ -316,14 +320,15 @@ class TestTicketUpdateView:
         user_developer,
         ticket_factory,
     ):
-        assigned_ticket = ticket_factory(status = Ticket.Status.PENDING_DEVELOPMENT)
-        
-        
+        assigned_ticket = ticket_factory(status=Ticket.Status.PENDING_DEVELOPMENT)
+
         client.force_login(user_developer)
 
-        response = client.get(reverse("tickets:update", kwargs={"pk": assigned_ticket.id}))
+        response = client.get(
+            reverse("tickets:update", kwargs={"pk": assigned_ticket.id})
+        )
         form = response.context["form"]
-        allowed_fields = {"status", 'resolution_notes'}
+        allowed_fields = {"status", "resolution_notes"}
 
         assert response.status_code == 200
         assert set(form.fields) == allowed_fields
@@ -341,12 +346,12 @@ class TestTicketUpdateView:
 
         response = client.post(
             reverse("tickets:update", kwargs={"pk": any_ticket.id}),
-            data ={
+            data={
                 "status": Ticket.Status.PENDING_DEVELOPMENT,
                 "assignee": user_developer.id,
                 "priority": Ticket.Priority.LOW,
-                "manager_notes": "Test manager_notes",               
-            }
+                "manager_notes": "Test manager_notes",
+            },
         )
 
         any_ticket.refresh_from_db()
@@ -364,31 +369,29 @@ class TestTicketUpdateView:
         user_developer,
         ticket_factory,
     ):
-        assigned_ticket = ticket_factory(status = Ticket.Status.PENDING_DEVELOPMENT)
+        assigned_ticket = ticket_factory(status=Ticket.Status.PENDING_DEVELOPMENT)
 
         client.force_login(user_developer)
 
         response = client.post(
             reverse("tickets:update", kwargs={"pk": assigned_ticket.id}),
-            data ={
+            data={
                 "status": Ticket.Status.IN_PROGRESS,
                 "resolution_notes": "Test resolution_notes",
-            }
+            },
         )
 
         assigned_ticket.refresh_from_db()
 
         assert response.status_code == 302
-        assert response.url == reverse("tickets:detail", kwargs={"pk": assigned_ticket.id})
+        assert response.url == reverse(
+            "tickets:detail", kwargs={"pk": assigned_ticket.id}
+        )
         assert assigned_ticket.status == Ticket.Status.IN_PROGRESS
         assert assigned_ticket.resolution_notes == "Test resolution_notes"
 
-
     def test_client_cannot_access_ticket_update_view(
-        self,
-        client,
-        user_client,
-        ticket_factory
+        self, client, user_client, ticket_factory
     ):
         ticket = ticket_factory()
 
@@ -426,7 +429,9 @@ class TestTicketUpdateView:
 
         client.force_login(user_developer)
 
-        response = client.get(reverse("tickets:update", kwargs={"pk": assigned_ticket.id}))
+        response = client.get(
+            reverse("tickets:update", kwargs={"pk": assigned_ticket.id})
+        )
 
         assert response.status_code == 403
 
@@ -437,29 +442,29 @@ class TestTicketUpdateView:
         ticket_factory,
     ):
         unassigned_ticket = ticket_factory(
-            assignee=DeveloperFactory.create(), 
-            status = Ticket.Status.PENDING_DEVELOPMENT
+            assignee=DeveloperFactory.create(), status=Ticket.Status.PENDING_DEVELOPMENT
         )
 
         client.force_login(user_developer)
 
-        response = client.get(reverse("tickets:update", kwargs={"pk": unassigned_ticket.id}))
+        response = client.get(
+            reverse("tickets:update", kwargs={"pk": unassigned_ticket.id})
+        )
 
         assert response.status_code == 404
 
     def test_ticket_update_redirects_unauthenticated_user_to_login(
-        self,
-        client,
-        ticket_factory
+        self, client, ticket_factory
     ):
         ticket = ticket_factory()
-    
+
         update_url = reverse("tickets:update", kwargs={"pk": ticket.id})
 
         response = client.get(update_url)
 
         assert response.status_code == 302
-        assert response.url == f'{reverse("users:login")}?next={update_url}'
+        assert response.url == f"{reverse('users:login')}?next={update_url}"
+
 
 @pytest.mark.django_db
 class TestCommentCreateView:
@@ -483,7 +488,9 @@ class TestCommentCreateView:
         comment = Comment.objects.get(ticket=client_ticket, user=user_client)
 
         assert response.status_code == 302
-        assert response.url == reverse("tickets:detail", kwargs={"pk": client_ticket.id})
+        assert response.url == reverse(
+            "tickets:detail", kwargs={"pk": client_ticket.id}
+        )
         assert comment.body == "Test body"
 
     def test_manager_can_create_comment(
@@ -529,7 +536,9 @@ class TestCommentCreateView:
         comment = Comment.objects.get(ticket=assigned_ticket, user=user_developer)
 
         assert response.status_code == 302
-        assert response.url == reverse("tickets:detail", kwargs={"pk": assigned_ticket.id})
+        assert response.url == reverse(
+            "tickets:detail", kwargs={"pk": assigned_ticket.id}
+        )
         assert comment.body == "Test body"
 
     def test_comment_create_get_redirects_to_ticket_detail(
@@ -547,7 +556,9 @@ class TestCommentCreateView:
         )
 
         assert response.status_code == 302
-        assert response.url == reverse("tickets:detail", kwargs={"pk": client_ticket.id})
+        assert response.url == reverse(
+            "tickets:detail", kwargs={"pk": client_ticket.id}
+        )
 
     def test_user_cannot_create_comment_with_invalid_data(
         self,
@@ -560,14 +571,13 @@ class TestCommentCreateView:
         client.force_login(user_client)
 
         response = client.post(
-            reverse("tickets:comment_create", kwargs={"pk":  client_ticket.id}),
+            reverse("tickets:comment_create", kwargs={"pk": client_ticket.id}),
             data={"body": ""},
         )
 
         assert response.status_code == 200
         assert response.context["comment_form"].errors
         assert Comment.objects.count() == 0
-
 
     def test_comment_create_redirects_unauthenticated_user_to_login(
         self,
@@ -584,5 +594,5 @@ class TestCommentCreateView:
         )
 
         assert response.status_code == 302
-        assert response.url == f'{reverse("users:login")}?next={comment_url}'
+        assert response.url == f"{reverse('users:login')}?next={comment_url}"
         assert Comment.objects.count() == 0

@@ -1,11 +1,11 @@
 from django.urls import path
 
 from .views import (
-    ticket_list_view,
-    ticket_detail_view,
-    ticket_create_view,
-    ticket_update_view,
     comment_create_view,
+    ticket_create_view,
+    ticket_detail_view,
+    ticket_list_view,
+    ticket_update_view,
 )
 
 app_name = "tickets"

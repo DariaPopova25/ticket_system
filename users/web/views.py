@@ -1,6 +1,6 @@
+from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from django.shortcuts import redirect
-from django.contrib.auth import login
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
@@ -15,6 +15,7 @@ class UserRegisterView(CreateView):
         self.object = form.save()
         login(self.request, self.object)
         return redirect("tickets:list")
+
 
 class UserLoginView(LoginView):
     template_name = "users/login.html"

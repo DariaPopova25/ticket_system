@@ -3,6 +3,7 @@ from django import forms
 from tickets.models import Ticket
 from users.models import User
 
+
 class TicketCreateForm(forms.Form):
     title = forms.CharField(
         max_length=255,
@@ -14,14 +15,15 @@ class TicketCreateForm(forms.Form):
         label="Description",
     )
 
+
 class ManagerTicketUpdateForm(forms.Form):
     status = forms.ChoiceField(
-        choices = Ticket.Status.choices,
+        choices=Ticket.Status.choices,
         label="Status",
     )
 
     assignee = forms.ModelChoiceField(
-        queryset = User.objects.filter(role = User.Role.DEVELOPER),
+        queryset=User.objects.filter(role=User.Role.DEVELOPER),
         required=False,
         label="Assignee",
     )
@@ -37,6 +39,7 @@ class ManagerTicketUpdateForm(forms.Form):
         required=False,
         label="Manager notes",
     )
+
 
 class DeveloperTicketUpdateForm(forms.Form):
     status = forms.ChoiceField(
@@ -63,6 +66,7 @@ class DeveloperTicketUpdateForm(forms.Form):
         required=False,
         label="Resolution notes",
     )
+
 
 class CommentCreateForm(forms.Form):
     body = forms.CharField(
