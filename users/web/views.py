@@ -1,3 +1,5 @@
+from typing import cast
+
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from django.shortcuts import redirect
@@ -20,4 +22,4 @@ class UserRegisterView(CreateView):
 class UserLoginView(LoginView):
     template_name = "users/login.html"
     redirect_authenticated_user = True
-    next_page = reverse_lazy("tickets:list")
+    next_page = cast(str, reverse_lazy("tickets:list"))
