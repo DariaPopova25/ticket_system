@@ -21,9 +21,8 @@ from users.models import User
 
 
 def _visible_tickets(user):
-    queryset = (
-        Ticket.objects.select_related("creator", "assignee")
-        .order_by("-created_at")
+    queryset = Ticket.objects.select_related("creator", "assignee").order_by(
+        "-created_at"
     )
 
     if user.role == User.Role.MANAGER:
