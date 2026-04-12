@@ -9,7 +9,6 @@ class TicketCreateForm(forms.Form):
         max_length=255,
         label="Title",
     )
-
     description = forms.CharField(
         max_length=10000,
         label="Description",
@@ -21,18 +20,15 @@ class ManagerTicketUpdateForm(forms.Form):
         choices=Ticket.Status.choices,
         label="Status",
     )
-
     assignee = forms.ModelChoiceField(
         queryset=User.objects.filter(role=User.Role.DEVELOPER),
         required=False,
         label="Assignee",
     )
-
     priority = forms.ChoiceField(
         choices=Ticket.Priority.choices,
         label="Priority",
     )
-
     manager_notes = forms.CharField(
         widget=forms.Textarea,
         max_length=2500,
@@ -59,7 +55,6 @@ class DeveloperTicketUpdateForm(forms.Form):
         ],
         label="Status",
     )
-
     resolution_notes = forms.CharField(
         widget=forms.Textarea,
         max_length=5000,

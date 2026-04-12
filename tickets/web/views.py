@@ -21,14 +21,17 @@ from users.models import User
 
 
 def _visible_tickets(user):
-    queryset = Ticket.objects.select_related("creator", "assignee").order_by(
-        "-created_at"
+    queryset = (
+        Ticket.objects.select_related("creator", "assignee")
+        .order_by("-created_at")
     )
 
     if user.role == User.Role.MANAGER:
         return queryset
+
     if user.role == User.Role.DEVELOPER:
         return queryset.filter(assignee=user)
+
     if user.role == User.Role.CLIENT:
         return queryset.filter(creator=user)
 
@@ -60,6 +63,7 @@ def _manager_ticket_update_view(request, pk):
 
     if request.method == "POST":
         form = ManagerTicketUpdateForm(request.POST)
+
         if form.is_valid():
             try:
                 ticket = manager_update_ticket(
@@ -83,7 +87,14 @@ def _manager_ticket_update_view(request, pk):
             }
         )
 
-    return render(request, "tickets/update.html", {"form": form, "ticket": ticket})
+    return render(
+        request,
+        "tickets/update.html",
+        {
+            "form": form,
+            "ticket": ticket,
+        },
+    )
 
 
 def _developer_ticket_update_view(request, pk):
@@ -94,6 +105,7 @@ def _developer_ticket_update_view(request, pk):
 
     if request.method == "POST":
         form = DeveloperTicketUpdateForm(request.POST)
+
         if form.is_valid():
             try:
                 ticket = developer_update_ticket(
@@ -113,7 +125,14 @@ def _developer_ticket_update_view(request, pk):
             }
         )
 
-    return render(request, "tickets/update.html", {"form": form, "ticket": ticket})
+    return render(
+        request,
+        "tickets/update.html",
+        {
+            "form": form,
+            "ticket": ticket,
+        },
+    )
 
 
 @login_required
@@ -141,6 +160,7 @@ def ticket_create_view(request):
 
     if request.method == "POST":
         form = TicketCreateForm(request.POST)
+
         if form.is_valid():
             try:
                 ticket = create_ticket(
@@ -176,6 +196,7 @@ def comment_create_view(request, pk):
         return redirect("tickets:detail", pk=ticket.pk)
 
     form = CommentCreateForm(request.POST)
+
     if form.is_valid():
         try:
             create_comment(

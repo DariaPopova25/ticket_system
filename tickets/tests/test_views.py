@@ -60,7 +60,10 @@ class TestTicketListView:
         assert ticket_two in tickets
 
     def test_ticket_list_shows_only_own_tickets_to_client(
-        self, client, user_client, ticket_factory
+        self,
+        client,
+        user_client,
+        ticket_factory,
     ):
         client_ticket = ticket_factory()
         other_client_ticket = ticket_factory(creator=ClientFactory.create())
@@ -80,7 +83,6 @@ class TestTicketListView:
         user_developer,
         ticket_factory,
     ):
-
         assigned_ticket = ticket_factory()
         unassigned_ticket = ticket_factory(assignee=DeveloperFactory.create())
 
@@ -110,7 +112,6 @@ class TestTicketDetailView:
         user_manager,
         ticket_factory,
     ):
-
         any_ticket = ticket_factory()
 
         client.force_login(user_manager)
@@ -127,7 +128,6 @@ class TestTicketDetailView:
         user_client,
         ticket_factory,
     ):
-
         client_ticket = ticket_factory()
 
         client.force_login(user_client)
@@ -146,7 +146,6 @@ class TestTicketDetailView:
         user_developer,
         ticket_factory,
     ):
-
         assigned_ticket = ticket_factory()
 
         client.force_login(user_developer)
@@ -166,6 +165,7 @@ class TestTicketDetailView:
         ticket_factory,
     ):
         other_client_ticket = ticket_factory(creator=ClientFactory.create())
+
         client.force_login(user_client)
 
         response = client.get(
@@ -181,6 +181,7 @@ class TestTicketDetailView:
         ticket_factory,
     ):
         unassigned_ticket = ticket_factory(assignee=DeveloperFactory.create())
+
         client.force_login(user_developer)
 
         response = client.get(
@@ -190,10 +191,11 @@ class TestTicketDetailView:
         assert response.status_code == 404
 
     def test_ticket_detail_redirects_unauthenticated_user_to_login(
-        self, client, ticket_factory
+        self,
+        client,
+        ticket_factory,
     ):
         ticket = ticket_factory()
-
         detail_url = reverse("tickets:detail", kwargs={"pk": ticket.id})
 
         response = client.get(detail_url)
@@ -209,7 +211,6 @@ class TestTicketCreateView:
         client,
         user_client,
     ):
-
         client.force_login(user_client)
 
         response = client.get(reverse("tickets:create"))
@@ -224,7 +225,6 @@ class TestTicketCreateView:
         client,
         user_client,
     ):
-
         client.force_login(user_client)
 
         response = client.post(
@@ -239,7 +239,8 @@ class TestTicketCreateView:
 
         assert response.status_code == 302
         assert response.url == reverse(
-            "tickets:detail", kwargs={"pk": created_ticket.id}
+            "tickets:detail",
+            kwargs={"pk": created_ticket.id},
         )
         assert created_ticket.creator == user_client
         assert created_ticket.description == "Test description"
@@ -252,6 +253,7 @@ class TestTicketCreateView:
         user_fixture,
     ):
         user = request.getfixturevalue(user_fixture)
+
         client.force_login(user)
 
         response = client.get(reverse("tickets:create"))
@@ -300,9 +302,11 @@ class TestTicketUpdateView:
     ]
 
     def test_manager_can_access_ticket_update_view(
-        self, client, user_manager, ticket_factory
+        self,
+        client,
+        user_manager,
+        ticket_factory,
     ):
-
         any_ticket = ticket_factory()
 
         client.force_login(user_manager)
@@ -385,13 +389,17 @@ class TestTicketUpdateView:
 
         assert response.status_code == 302
         assert response.url == reverse(
-            "tickets:detail", kwargs={"pk": assigned_ticket.id}
+            "tickets:detail",
+            kwargs={"pk": assigned_ticket.id},
         )
         assert assigned_ticket.status == Ticket.Status.IN_PROGRESS
         assert assigned_ticket.resolution_notes == "Test resolution_notes"
 
     def test_client_cannot_access_ticket_update_view(
-        self, client, user_client, ticket_factory
+        self,
+        client,
+        user_client,
+        ticket_factory,
     ):
         ticket = ticket_factory()
 
@@ -442,7 +450,8 @@ class TestTicketUpdateView:
         ticket_factory,
     ):
         unassigned_ticket = ticket_factory(
-            assignee=DeveloperFactory.create(), status=Ticket.Status.PENDING_DEVELOPMENT
+            assignee=DeveloperFactory.create(),
+            status=Ticket.Status.PENDING_DEVELOPMENT,
         )
 
         client.force_login(user_developer)
@@ -454,10 +463,11 @@ class TestTicketUpdateView:
         assert response.status_code == 404
 
     def test_ticket_update_redirects_unauthenticated_user_to_login(
-        self, client, ticket_factory
+        self,
+        client,
+        ticket_factory,
     ):
         ticket = ticket_factory()
-
         update_url = reverse("tickets:update", kwargs={"pk": ticket.id})
 
         response = client.get(update_url)
@@ -489,7 +499,8 @@ class TestCommentCreateView:
 
         assert response.status_code == 302
         assert response.url == reverse(
-            "tickets:detail", kwargs={"pk": client_ticket.id}
+            "tickets:detail",
+            kwargs={"pk": client_ticket.id},
         )
         assert comment.body == "Test body"
 
@@ -537,7 +548,8 @@ class TestCommentCreateView:
 
         assert response.status_code == 302
         assert response.url == reverse(
-            "tickets:detail", kwargs={"pk": assigned_ticket.id}
+            "tickets:detail",
+            kwargs={"pk": assigned_ticket.id},
         )
         assert comment.body == "Test body"
 
@@ -557,7 +569,8 @@ class TestCommentCreateView:
 
         assert response.status_code == 302
         assert response.url == reverse(
-            "tickets:detail", kwargs={"pk": client_ticket.id}
+            "tickets:detail",
+            kwargs={"pk": client_ticket.id},
         )
 
     def test_user_cannot_create_comment_with_invalid_data(
@@ -585,7 +598,6 @@ class TestCommentCreateView:
         ticket_factory,
     ):
         ticket = ticket_factory()
-
         comment_url = reverse("tickets:comment_create", kwargs={"pk": ticket.id})
 
         response = client.post(
