@@ -21,18 +21,21 @@ class ManagerTicketUpdateForm(forms.Form):
     status = forms.ChoiceField(
         choices=Ticket.Status.choices,
         label="Status",
+        widget=forms.Select(attrs={"class": "form-select mb-3"}),
     )
     assignee = forms.ModelChoiceField(
         queryset=User.objects.filter(role=User.Role.DEVELOPER),
         required=False,
         label="Assignee",
+        widget=forms.Select(attrs={"class": "form-select mb-3"}),
     )
     priority = forms.ChoiceField(
         choices=Ticket.Priority.choices,
         label="Priority",
+        widget=forms.Select(attrs={"class": "form-select mb-3"}),
     )
     manager_notes = forms.CharField(
-        widget=forms.Textarea,
+        widget=forms.Textarea(attrs={"class": "form-control mb-3", "rows": 6}),
         max_length=2500,
         required=False,
         label="Manager notes",
@@ -56,9 +59,10 @@ class DeveloperTicketUpdateForm(forms.Form):
             ),
         ],
         label="Status",
+        widget=forms.Select(attrs={"class": "form-select mb-3"}),
     )
     resolution_notes = forms.CharField(
-        widget=forms.Textarea,
+        widget=forms.Textarea(attrs={"class": "form-control mb-3", "rows": 6}),
         max_length=5000,
         required=False,
         label="Resolution notes",
