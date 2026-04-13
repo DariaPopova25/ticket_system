@@ -8,10 +8,12 @@ class TicketCreateForm(forms.Form):
     title = forms.CharField(
         max_length=255,
         label="Title",
+        widget=forms.TextInput(attrs={"class": "form-control mb-3"}),
     )
     description = forms.CharField(
         max_length=10000,
         label="Description",
+        widget=forms.Textarea(attrs={"class": "form-control mb-3", "rows": 6}),
     )
 
 
