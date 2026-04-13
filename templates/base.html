@@ -42,7 +42,9 @@
                     </ul>
 
                     <div class="d-flex align-items-center gap-2">
-                        <span class="text-muted small">{{ request.user.email }}</span>
+                        <span class="text-muted small">
+                            {{ request.user.get_role_display }}: {{ request.user.email }}
+                        </span>
 
                         <form method="post" action="{% url 'users:logout' %}" class="m-0">
                             {% csrf_token %}
