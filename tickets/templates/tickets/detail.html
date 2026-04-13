@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Ticket Details{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-9">
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h1 class="h3 mb-4">{{ ticket.title }}</h1>
+
+                    <div class="small text-muted mb-4">
+                        <div>Status: {{ ticket.get_status_display }}</div>
+                        <div>Priority: {{ ticket.get_priority_display|default:"—" }}</div>
+                        <div>Creator: {{ ticket.creator.email }}</div>
+                        <div>Developer: {{ ticket.assignee.email|default:"—" }}</div>
+                        <div>Created at: {{ ticket.created_at }}</div>
+                    </div>
+                    
+                    <div class="border-top pt-3 mb-3">
+                        <h2 class="h6 mb-2">Description</h2>
+                        <p class="mb-0 text-muted">{{ ticket.description|linebreaksbr|default:"—" }}</p>
+                    </div>
+
+                    <div class="border-top pt-3 mb-3">
+                        <h2 class="h6 mb-2">Manager notes</h2>
+                        <p class="mb-0 text-muted">{{ ticket.manager_notes|linebreaksbr|default:"—" }}</p>
+                    </div>
+
+                    <div class="border-top pt-3">
+                        <h2 class="h6 mb-2">Resolution notes</h2>
+                        <p class="mb-0 text-muted">{{ ticket.resolution_notes|linebreaksbr|default:"—" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="h5 mb-3">Add Comment</h2>
+
+                    <form method="post" action="{% url 'tickets:comment_create' ticket.pk %}">
+                        {% csrf_token %}
+                        {{ comment_form.non_field_errors }}
+                        {{ comment_form.as_div }}
+
+                        <button type="submit" class="btn btn-secondary mt-3">
+                            Add Comment
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="h5 mb-3">Comments</h2>
+
+                    <div class="overflow-auto pe-2" style="max-height: 320px;">
+                        {% for comment in comments %}
+                            <div class="border-top pt-3 {% if not forloop.last %}mb-3{% endif %}">
+                                <div class="small text-muted mb-2">
+                                    {{ comment.user.role }} · {{ comment.user.email }} · {{ comment.created_at }}
+                                </div>
+                                <p class="mb-0">{{ comment.body|linebreaksbr }}</p>
+                            </div>
+                        {% empty %}
+                            <p class="text-muted mb-0">No comments yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}

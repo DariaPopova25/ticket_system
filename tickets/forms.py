@@ -67,7 +67,7 @@ class DeveloperTicketUpdateForm(forms.Form):
 
 class CommentCreateForm(forms.Form):
     body = forms.CharField(
-        widget=forms.Textarea,
         max_length=500,
-        label="Comment",
+        label="",
+        widget=forms.Textarea(attrs={"class": "form-control mb-3"}),
     )
