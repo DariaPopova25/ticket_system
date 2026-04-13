@@ -11,8 +11,12 @@
                     <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
                         <h1 class="h3 mb-0">{{ ticket.title }}</h1>
 
-                        {% if request.user.role == 'manager' or request.user.role == 'developer' %}
-                            {% if ticket.status != 'done' and ticket.status != 'cancelled' %}
+                        {% if ticket.status != 'done' and ticket.status != 'cancelled' %}
+                            {% if request.user.role == 'manager' %}
+                                <a href="{% url 'tickets:update' ticket.pk %}" class="btn btn-outline-secondary btn-sm">
+                                    Update
+                                </a>
+                            {% elif request.user.role == 'developer' and ticket.status != 'new' %}
                                 <a href="{% url 'tickets:update' ticket.pk %}" class="btn btn-outline-secondary btn-sm">
                                     Update
                                 </a>
