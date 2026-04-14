@@ -141,7 +141,7 @@ def ticket_list_view(request):
     paginator = Paginator(tickets_qs, 10)
     page_number = request.GET.get("page")
     tickets = paginator.get_page(page_number)
-    
+
     return render(request, "tickets/list.html", {"tickets": tickets})
 
 
