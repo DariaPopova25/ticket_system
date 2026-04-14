@@ -63,7 +63,7 @@ ROOT_URLCONF = "ticket_system.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -130,3 +130,6 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 AUTH_USER_MODEL = "users.User"
+
+LOGIN_URL = "users:login"
+LOGOUT_REDIRECT_URL = "users:login"
