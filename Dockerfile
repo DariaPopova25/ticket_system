@@ -5,11 +5,13 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-COPY requirements.txt requirements-dev.txt ./
+COPY requirements.txt ./
 
 RUN python -m pip install --upgrade pip \
-    && pip install -r requirements-dev.txt
+    && pip install -r requirements.txt
 
 COPY . .
 
-EXPOSE 8000
+EXPOSE 10000
+
+CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn ticket_system.wsgi:application --bind 0.0.0.0:${PORT:-10000}"]
