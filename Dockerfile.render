@@ -1,0 +1,17 @@
+FROM python:3.14-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+COPY requirements.txt ./
+
+RUN python -m pip install --upgrade pip \
+    && pip install -r requirements.txt
+
+COPY . .
+
+EXPOSE 10000
+
+CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn ticket_system.wsgi:application --bind 0.0.0.0:${PORT:-10000}"]
