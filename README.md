@@ -8,7 +8,7 @@
 
 - [Открыть проект](https://ticket-system-u4k8.onrender.com)
 
-- [Посмотреть видео-демонстрацию основного сценария: от создания до закрытия заявки](https://drive.google.com/file/d/1LFN7VgKUhddtqcmW0h9niXBnCFfRq1Un/view?usp=sharing)
+- [Посмотреть видео-демонстрацию основного сценария: от создания до закрытия заявки](https://drive.google.com/file/d/1ytzzBgo11zMGiqAiqyYiRWZE_GyepDjH/view?usp=sharing)
 
 ### Демо-аккаунты для Render
 
